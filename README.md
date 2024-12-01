@@ -60,3 +60,47 @@ Educativo y de Aprendizaje Personal
 8. Creamos la Aplicación baseapp
     ```bash
     python manage.py startapp baseapp
+
+## Configuración del Proyecto
+
+9. Hacemos Migraciones para que cree las tablas por defecto que tiene django y creando el db.sqlite3
+   ```bash 
+   python manage.py migrate
+
+## Configuración del Proyecto
+
+10. Conectar el proyecto con la aplicación: Agregar 'baseapp.apps.BaseappConfig', en la lista INSTALLED_APPS dentro del archivo proyecto/settings.py
+
+    ```bash
+    INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'baseapp.apps.BaseappConfig',
+    ]
+11. En baseapp creamos la urls.py = baseapp/urls.py 
+12. Configuramos la views que esta en baseapp/views.py
+    ```bash
+    from django.shortcuts import render
+    from django.http import HttpResponse
+
+    # Create your views here.
+    def lista_pendientes(pedido):
+        return HttpResponse("listas pendientes")
+
+13. Volvemos baseapp/urls.py llamamos a la función listas_pendientes views. 
+    ```bash
+    from django.urls import path 
+    from . import views
+
+    urlpatterns = [path('',views.lista_pendientes, name="pendientes")]
+
+14. Hacemos correr el Servidor = y nos dara como resultado lo que contenga la función de listas pendientes
+    ```bash
+    python manage.py runserver 
+
+
+   
