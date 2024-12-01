@@ -98,7 +98,16 @@ Educativo y de Aprendizaje Personal
 
     urlpatterns = [path('',views.lista_pendientes, name="pendientes")]
 
-14. Hacemos correr el Servidor = y nos dara como resultado lo que contenga la función de listas pendientes
+14. Agregamos la ruta de baseapp.urls al proyecto/urls.py
+    ```bash
+    from django.contrib import admin
+    from django.urls import path, include
+
+    urlpatterns = [
+        path('admin/', admin.site.urls),
+        path('',include('baseapp.urls')),]
+
+15. Hacemos correr el Servidor = y nos dara como resultado lo que contenga la función de listas pendientes
     ```bash
     python manage.py runserver 
 
