@@ -381,3 +381,91 @@ Educativo y de Aprendizaje Personal
         <h3>No hay elementos en la lista</h3>
         {% endfor %}
     </table>
+
+36. baseapp/views.py se agrega DeleteView y se crea la clase Eliminar-Tarea
+
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView, DeleteView
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+
+    class ListasPendientes(ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+    
+    class DetalleTarea(DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(CreateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+        
+    class EditarTarea(UpdateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+        
+    class EliminarTarea(DeleteView):
+        model = Tarea
+        template_name ='baseapp/tarea_confirm_delete.html'
+        context_object_name = 'tarea'
+        success_url = reverse_lazy('tareas')
+    
+37. Agrego la urls.py baseapp/urls.py  path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
+    http://127.0.0.1:8000/eliminar-tarea/1
+
+    ```bash
+    from django.urls import path 
+    from .views import ListasPendientes, DetalleTarea, CrearTarea, EditarTarea, EliminarTarea
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="tareas"),
+        path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+        path('crear-tarea/', CrearTarea.as_view(), name="crear-tarea"),
+        path('editar-tarea/<int:pk>', EditarTarea.as_view(), name="editar-tarea"),
+        path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
+
+    ]
+
+38. en templates/baseapp/tarea_list.html agrego <td><a href="{% url 'eliminar-tarea' tarea.id %}">Eliminar</a></td>
+    ```bash
+    <h1>Listas Pendientes</h1>
+    <a href="{% url 'crear-tarea' %}">Crear Nueva Tarea</a>
+    <table>
+        <tr>
+            <th>Elementos</th>
+            <th></th>
+            <th></th>
+            <th></th>
+
+        </tr>
+
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{tarea.titulo}}</td>
+            <td><a href="{% url 'tarea' tarea.id %}">Ver</a></td>
+            <td><a href="{% url 'editar-tarea' tarea.id %}">Editar</a></td>
+            <td><a href="{% url 'eliminar-tarea' tarea.id %}">Eliminar</a></td>
+
+        </tr>
+        {% empty %}
+        <h3>No hay elementos en la lista</h3>
+        {% endfor %}
+    </table>
+
+39. En templates/baseapp/tarea_confirm_delete.html
+    ```bash
+    <a href="{% url 'tareas' %}">Volver</a>
+
+    <form method="POST">
+        {% csrf_token %}
+        <p>Vas a eliminar esta tarea:"{{tarea}}"</p>
+        <input type="submit" value="Eliminar">
+    </form>

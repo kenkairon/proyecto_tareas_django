@@ -1,6 +1,6 @@
 from django.views.generic import ListView
 from django.views.generic import DetailView
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Tarea
 
@@ -23,5 +23,11 @@ class CrearTarea(CreateView):
 class EditarTarea(UpdateView):
     model = Tarea
     fields = '__all__'
+    success_url = reverse_lazy('tareas')
+    
+class EliminarTarea(DeleteView):
+    model = Tarea
+    template_name ='baseapp/tarea_confirm_delete.html'
+    context_object_name = 'tarea'
     success_url = reverse_lazy('tareas')
     
