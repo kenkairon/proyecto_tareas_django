@@ -1,9 +1,17 @@
 from django.views.generic import ListView
 from django.views.generic import DetailView
 from django.views.generic import CreateView, UpdateView, DeleteView
+from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from .models import Tarea
 
+class logueo(LoginView):
+    template_name='baseapp/login.html'
+    field= '__all__'
+    redirect_authenticated_user = True
+    
+    def get_success_url(self):
+        return reverse_lazy('tareas')
 
 class ListasPendientes(ListView):
     model = Tarea
