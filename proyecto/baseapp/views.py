@@ -1,6 +1,10 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.views.generic import ListView
+from .models import Tarea
 
-# Create your views here.
-def lista_pendientes(pedido):
-    return HttpResponse("listas pendientes")
+
+class ListasPendientes(ListView):
+    model = Tarea
+    template_name ='tarea_list.html'
+    context_object_name = 'tareas'
+  
+

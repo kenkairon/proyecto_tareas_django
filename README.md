@@ -195,4 +195,49 @@ Educativo y de Aprendizaje Personal
     admin@gmail.com
     admin1234
 
-23. 
+23. En la aplicación baseapp/views.py  ListView Este tipo de vista está diseñado específicamente para trabajar con listas de objetos, como datos de un modelo, y simplifica la tarea de renderizar datos en una plantilla.
+    ```bash
+    from django.views.generic import ListView
+    from .models import Tarea
+
+    class ListasPendientes(ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+
+24. Verificamos  baseapp/urls.py
+     ```bash
+    from django.urls import path 
+    from baseapp.views import ListasPendientes
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="pendientes")
+    ]
+
+25. creamos la carpeta templates/tarea_list.html
+    ```bash
+    <h1>Listas Pendientes</h1>
+
+    <table>
+        <tr>
+            <th>Elementos</th>
+        </tr>
+
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{tarea.titulo}}</td>
+        </tr>
+        {% empty %}
+        <h3>No hay elementos en la lista</h3>
+        {% endfor %}
+    </table>
+
+26. En la Configuración al proyecto/urls.py agregas el  path('',include('baseapp.urls')),
+    ```bash
+    from django.contrib import admin
+    from django.urls import path, include
+
+    urlpatterns = [
+        path('admin/', admin.site.urls),
+        path('',include('baseapp.urls')),
+    ]
