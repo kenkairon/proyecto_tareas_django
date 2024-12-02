@@ -469,3 +469,37 @@ Educativo y de Aprendizaje Personal
         <p>Vas a eliminar esta tarea:"{{tarea}}"</p>
         <input type="submit" value="Eliminar">
     </form>
+
+40. templates/baseapp/tarea_list.html creando la lógica del logeo
+    ```bash
+    {% if request.user.is_authenticated %}
+    <p>{{request.user}}</p>
+    <a href="">Salir</a>
+    {% else%}
+    <a href="">Ingresar</a>
+    {% endif %}
+    <hr>
+
+    <h1>Listas Pendientes</h1>
+    <a href="{% url 'crear-tarea' %}">Crear Nueva Tarea</a>
+    <table>
+        <tr>
+            <th>Elementos</th>
+            <th></th>
+            <th></th>
+            <th></th>
+
+        </tr>
+
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{tarea.titulo}}</td>
+            <td><a href="{% url 'tarea' tarea.id %}">Ver</a></td>
+            <td><a href="{% url 'editar-tarea' tarea.id %}">Editar</a></td>
+            <td><a href="{% url 'eliminar-tarea' tarea.id %}">Eliminar</a></td>
+
+        </tr>
+        {% empty %}
+        <h3>No hay elementos en la lista</h3>
+        {% endfor %}
+    </table>
