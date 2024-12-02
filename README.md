@@ -1,4 +1,4 @@
-# proyecto_tareas_python
+# proyecto_tareas_django
 Educativo y de Aprendizaje Personal
 
 ---
