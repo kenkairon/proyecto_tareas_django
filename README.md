@@ -10,6 +10,7 @@ Educativo y de Aprendizaje Personal
 - [Configuración Inicial](#configuración-inicial)
 - [Pasos del Proyecto](#pasos-del-proyecto)
   - [Configuración del Proyecto](#configuración-del-proyecto)
+  - [Creación del Superusuario](#Creación-del-Superusuario)
   - [Creación de Vistas y Modelos](#creación-de-vistas-y-modelos)
 
 ---
@@ -173,3 +174,25 @@ Educativo y de Aprendizaje Personal
 19. Procedemos hacer la migración donde se veran los datos reflejado en db.sqlite3 y creara baseapp_tarea en la base de datos
     ```bash
     python manage.py migrate 
+
+## Creación del Superusuario
+
+20. Creamos el super usuario 
+    ```bash
+    python manage.py createsuperuser
+
+21. Creamos permisos para ver las tablas baseapp/admin.py
+    ```bash
+    from django.contrib import admin
+    from .models import Tarea
+    # Register your models here.
+
+    admin.site.register(Tarea)
+
+22. Verificamos los permisos http://127.0.0.1:8000/admin para modo de aprendizaje vamos a poner estas credenciales 
+    ```bash
+    admin 
+    admin@gmail.com
+    admin1234
+
+23. 
