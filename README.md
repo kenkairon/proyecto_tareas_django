@@ -214,7 +214,7 @@ Educativo y de Aprendizaje Personal
         path('',ListasPendientes.as_view(), name="pendientes")
     ]
 
-25. creamos la carpeta templates/tarea_list.html
+25. creamos la carpeta templates/baseapp/tarea_list.html
     ```bash
     <h1>Listas Pendientes</h1>
 
@@ -241,3 +241,37 @@ Educativo y de Aprendizaje Personal
         path('admin/', admin.site.urls),
         path('',include('baseapp.urls')),
     ]
+27. Vamos a Reconfigurar la Vista baseapp/views.py para agregar la clase DetalleTarea
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from .models import Tarea
+
+    class ListasPendientes(ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+    
+    class DetalleTarea(DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+   
+
+28. Configuramos la urls.py de la aplicación baseapp/urls.py donde van a estar las rutas de la navegación en el navegador 
+    http://127.0.0.1:8000/tarea/1
+
+    ```bash
+    from django.urls import path 
+    from .views import ListasPendientes, DetalleTarea
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="pendientes"),
+        path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+
+    ]
+29. Configuras el templates/tarea.html, estoy enviando desde  baseapp/views.py el  context_object_name = 'tarea' para que se exprese en el templates
+    ```bash
+    <h1>Tarea: {{tarea}}</h1>
+
+

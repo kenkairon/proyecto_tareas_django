@@ -1,6 +1,8 @@
 from django.urls import path 
-from baseapp.views import ListasPendientes
+from .views import ListasPendientes, DetalleTarea
 
 urlpatterns = [
-    path('',ListasPendientes.as_view(), name="pendientes")
+    path('',ListasPendientes.as_view(), name="pendientes"),
+    path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+
 ]
