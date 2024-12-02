@@ -304,10 +304,80 @@ Educativo y de Aprendizaje Personal
     from .views import ListasPendientes, DetalleTarea, CrearTarea
 
     urlpatterns = [
-        path('',ListasPendientes.as_view(), name="pendientes"),
+        path('',ListasPendientes.as_view(), name="tareas"),
         path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
         path('crear-tarea/', CrearTarea.as_view(), name="crear-tarea"),
     ]
 32. Agregamos en el templates/baseapp/tarea_form.html
     ```bash
     <h1>Formulario de Tareas</h1>
+    <a href="{% url 'tareas'%}">Volver</a>
+    <form method="POST" action="">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Enviar">
+    </form>
+
+33. baseapp/views.py Agregamos UpdateView y EditarTarea
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+
+    class ListasPendientes(ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+    
+    class DetalleTarea(DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(CreateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+        
+    class EditarTarea(UpdateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+
+ 34. Configurar baseapp/urls.py http://127.0.0.1:8000/editar-tarea/1
+    ```bash
+    from django.urls import path 
+    from .views import ListasPendientes, DetalleTarea, CrearTarea, EditarTarea
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="tareas"),
+        path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+        path('crear-tarea/', CrearTarea.as_view(), name="crear-tarea"),
+        path('editar-tarea/<int:pk>', EditarTarea.as_view(), name="editar-tarea"),
+]
+
+35. templates\baseapp\tarea_list.html agregamos <td><a href="{% url 'editar-tarea' tarea.id %}">Editar</a></td>
+
+    ```bash
+    <h1>Listas Pendientes</h1>
+    <a href="{% url 'crear-tarea' %}">Crear Nueva Tarea</a>
+    <table>
+        <tr>
+            <th>Elementos</th>
+            <th></th>
+            <th></th>
+        </tr>
+
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{tarea.titulo}}</td>
+            <td><a href="{% url 'tarea' tarea.id %}">Ver</a></td>
+            <td><a href="{% url 'editar-tarea' tarea.id %}">Editar</a></td>
+        </tr>
+        {% empty %}
+        <h3>No hay elementos en la lista</h3>
+        {% endfor %}
+    </table>
