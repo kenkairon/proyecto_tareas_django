@@ -274,4 +274,40 @@ Educativo y de Aprendizaje Personal
     ```bash
     <h1>Tarea: {{tarea}}</h1>
 
+30. Configuramos la vista en baseapp/views.py y agregamos CrearTarea
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView
+    from django.urls import reverse_lazy
+    from .models import Tarea
 
+
+    class ListasPendientes(ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+    
+    class DetalleTarea(DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(CreateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+
+31. Configuramos la urls en baseapp/urls.py  http://127.0.0.1:8000/crear-tarea/ 
+    ```bash
+    from django.urls import path 
+    from .views import ListasPendientes, DetalleTarea, CrearTarea
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="pendientes"),
+        path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+        path('crear-tarea/', CrearTarea.as_view(), name="crear-tarea"),
+    ]
+32. Agregamos en el templates/baseapp/tarea_form.html
+    ```bash
+    <h1>Formulario de Tareas</h1>

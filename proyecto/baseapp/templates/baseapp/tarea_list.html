@@ -1,13 +1,15 @@
 <h1>Listas Pendientes</h1>
-
+<a href="{% url 'crear-tarea' %}">Crear Nueva Tarea</a>
 <table>
     <tr>
         <th>Elementos</th>
+        <th></th>
     </tr>
 
     {% for tarea in tareas %}
     <tr>
         <td>{{tarea.titulo}}</td>
+        <td><a href="{% url 'tarea' tarea.id %}">Ver</a></td>
     </tr>
     {% empty %}
     <h3>No hay elementos en la lista</h3>
