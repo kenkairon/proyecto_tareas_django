@@ -8,27 +8,56 @@
 <a href="{% url 'login' %}">Ingresar</a>
 {% endif %}
 <hr>
-
 <h1>Listas Pendientes</h1>
+<!-- Formulario de búsqueda -->
+<form method="GET">
+    <input type="text" name="area-buscar" value="{{ valor_buscado }}">
+    <input type="submit" value="Buscar">
+</form>
+<br>
 <a href="{% url 'crear-tarea' %}">Crear Nueva Tarea</a>
+
 <table>
     <tr>
         <th>Elementos</th>
         <th></th>
         <th></th>
         <th></th>
-
     </tr>
 
     {% for tarea in tareas %}
     <tr>
-        <td>{{tarea.titulo}}</td>
+        <td>{{ tarea.titulo }}</td>
         <td><a href="{% url 'tarea' tarea.id %}">Ver</a></td>
         <td><a href="{% url 'editar-tarea' tarea.id %}">Editar</a></td>
         <td><a href="{% url 'eliminar-tarea' tarea.id %}">Eliminar</a></td>
-
     </tr>
     {% empty %}
     <h3>No hay elementos en la lista</h3>
     {% endfor %}
 </table>
+
+<!-- Controles de paginación -->
+<div class="pagination">
+    <span class="step-links">
+        {% if is_paginated %}
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if valor_buscado %}&area-buscar={{ valor_buscado }}{% endif %}">&laquo; Primera</a>
+        <a
+            href="?page={{ page_obj.previous_page_number }}{% if valor_buscado %}&area-buscar={{ valor_buscado }}{% endif %}">Anterior</a>
+        {% endif %}
+
+        <span class="current">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+        <a
+            href="?page={{ page_obj.next_page_number }}{% if valor_buscado %}&area-buscar={{ valor_buscado }}{% endif %}">Siguiente</a>
+        <a
+            href="?page={{ page_obj.paginator.num_pages }}{% if valor_buscado %}&area-buscar={{ valor_buscado }}{% endif %}">Última
+            &raquo;</a>
+        {% endif %}
+        {% endif %}
+    </span>
+</div>
