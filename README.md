@@ -504,7 +504,7 @@ Educativo y de Aprendizaje Personal
         {% endfor %}
     </table>
 
-38. Creamos la ruta en baseapp/urls.py y agregamos la ruta  path('login/', logueo.as_view(), name="login"),
+41. Creamos la ruta en baseapp/urls.py y agregamos la ruta  path('login/', logueo.as_view(), name="login"),
     ```bash
     from django.urls import path 
     from .views import ListasPendientes, DetalleTarea, CrearTarea, EditarTarea, EliminarTarea, logueo
@@ -518,7 +518,7 @@ Educativo y de Aprendizaje Personal
         path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
 
     ]
-39. en las vistas baseapp/views.py agregamos  from django.contrib.auth.views import LoginView y creamos la Clase logueo
+42. en las vistas baseapp/views.py agregamos  from django.contrib.auth.views import LoginView y creamos la Clase logueo
     ```bash
     from django.views.generic import ListView
     from django.views.generic import DetailView
@@ -561,7 +561,7 @@ Educativo y de Aprendizaje Personal
         context_object_name = 'tarea'
         success_url = reverse_lazy('tareas')
 
-40. Creamos en templates/baseapp/login.html
+43. Creamos en templates/baseapp/login.html
     ```bash
     <h1>ingresar</h1>
     <form method="POST">
@@ -570,7 +570,7 @@ Educativo y de Aprendizaje Personal
         <input type="submit" value="Ingresar">
     </form>
 
-41. Podemos configurar el logout desde la baseapp/urls.py Y Lo configuramos directamente y agregamos path('logout/', LogoutView.as_view(next_page="login"), name="logout" ),
+44. Podemos configurar el logout desde la baseapp/urls.py Y Lo configuramos directamente y agregamos path('logout/', LogoutView.as_view(next_page="login"), name="logout" ),
 
     ```bash
     from django.urls import path 
@@ -586,7 +586,7 @@ Educativo y de Aprendizaje Personal
         path('editar-tarea/<int:pk>', EditarTarea.as_view(), name="editar-tarea"),
         path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
     ]
-42. Modificamos en templates/baseapp/tarea_list.html  el boton de Salir con el objetivo de que no tengamos ataques 
+45. Modificamos en templates/baseapp/tarea_list.html  el boton de Salir con el objetivo de que no tengamos ataques 
     ```bash
     {% if request.user.is_authenticated %}
     <p>{{request.user}}</p>
@@ -623,7 +623,7 @@ Educativo y de Aprendizaje Personal
         {% endfor %}
     </table>
 
-43. baseapp/views.py, agregamos from django.contrib.auth.mixins import LoginRequiredMixin, vamos agregando a las paginas que quiero restringir menos la de login con el objetivo de poder ingresar usuario y contraseña
+46. baseapp/views.py, agregamos from django.contrib.auth.mixins import LoginRequiredMixin, vamos agregando a las paginas que quiero restringir menos la de login con el objetivo de poder ingresar usuario y contraseña
 
     ```bash
     from django.views.generic import ListView
@@ -669,22 +669,23 @@ Educativo y de Aprendizaje Personal
         success_url = reverse_lazy('tareas')
     
 
-44. En proyecto/settings.py agregamos LOGIN_URL = 'login'
-   ```bash
-    # Internationalization
-    # https://docs.djangoproject.com/en/5.1/topics/i18n/
+47. En proyecto/settings.py agregamos LOGIN_URL = 'login'
 
-    LANGUAGE_CODE = 'en-us'
+    ```bash
+        # Internationalization
+        # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-    TIME_ZONE = 'UTC'
+        LANGUAGE_CODE = 'en-us'
 
-    USE_I18N = True
+        TIME_ZONE = 'UTC'
 
-    USE_TZ = True
+        USE_I18N = True
 
-    LOGIN_URL = 'login'
+        USE_TZ = True
 
-45. baseapp/views.py Este código que esta comentado, cada usuario va tener sus propias tareas 
+        LOGIN_URL = 'login'
+
+48. baseapp/views.py Este código que esta comentado, cada usuario va tener sus propias tareas 
     ```bash
     from django.views.generic import ListView
     from django.views.generic import DetailView
