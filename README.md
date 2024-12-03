@@ -503,3 +503,70 @@ Educativo y de Aprendizaje Personal
         <h3>No hay elementos en la lista</h3>
         {% endfor %}
     </table>
+
+38. Creamos la ruta en baseapp/urls.py y agregamos la ruta  path('login/', logueo.as_view(), name="login"),
+    ```bash
+    from django.urls import path 
+    from .views import ListasPendientes, DetalleTarea, CrearTarea, EditarTarea, EliminarTarea, logueo
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="tareas"),
+        path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+        path('login/', logueo.as_view(), name="login"),
+        path('crear-tarea/', CrearTarea.as_view(), name="crear-tarea"),
+        path('editar-tarea/<int:pk>', EditarTarea.as_view(), name="editar-tarea"),
+        path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
+
+    ]
+39. en las vistas baseapp/views.py agregamos  from django.contrib.auth.views import LoginView y creamos la Clase logueo
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView, DeleteView
+    from django.contrib.auth.views import LoginView
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+    class logueo(LoginView):
+        template_name='baseapp/login.html'
+        field= '__all__'
+        redirect_authenticated_user = True
+        
+        def get_success_url(self):
+            return reverse_lazy('tareas')
+
+    class ListasPendientes(ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+    
+    class DetalleTarea(DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(CreateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+        
+    class EditarTarea(UpdateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+        
+    class EliminarTarea(DeleteView):
+        model = Tarea
+        template_name ='baseapp/tarea_confirm_delete.html'
+        context_object_name = 'tarea'
+        success_url = reverse_lazy('tareas')
+
+40. Creamos en templates/baseapp/login.html
+    ```bash
+    <h1>ingresar</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Ingresar">
+    </form>
+    
