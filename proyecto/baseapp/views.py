@@ -1,10 +1,14 @@
 from django.views.generic import ListView
 from django.views.generic import DetailView
 from django.views.generic import CreateView, UpdateView, DeleteView
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from .models import Tarea
 
+class CustomLogoutView(LogoutView):
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
 class logueo(LoginView):
     template_name='baseapp/login.html'
     field= '__all__'

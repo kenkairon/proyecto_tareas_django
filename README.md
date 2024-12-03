@@ -569,4 +569,56 @@ Educativo y de Aprendizaje Personal
         {{form.as_p}}
         <input type="submit" value="Ingresar">
     </form>
-    
+
+41. Podemos configurar el logout desde la baseapp/urls.py Y Lo configuramos directamente y agregamos path('logout/', LogoutView.as_view(next_page="login"), name="logout" ),
+
+    ```bash
+    from django.urls import path 
+    from .views import ListasPendientes, DetalleTarea, CrearTarea, EditarTarea, EliminarTarea, logueo
+    from django.contrib.auth.views import LogoutView
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="tareas"),
+        path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+        path('login/', logueo.as_view(), name="login"),
+        path('logout/', LogoutView.as_view(next_page="login"), name="logout" ),
+        path('crear-tarea/', CrearTarea.as_view(), name="crear-tarea"),
+        path('editar-tarea/<int:pk>', EditarTarea.as_view(), name="editar-tarea"),
+        path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
+    ]
+42. Modificamos en templates/baseapp/tarea_list.html  el boton de Salir con el objetivo de que no tengamos ataques 
+    ```bash
+    {% if request.user.is_authenticated %}
+    <p>{{request.user}}</p>
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Salir</button>
+    </form>
+    {% else%}
+    <a href="{% url 'login' %}">Ingresar</a>
+    {% endif %}
+    <hr>
+
+    <h1>Listas Pendientes</h1>
+    <a href="{% url 'crear-tarea' %}">Crear Nueva Tarea</a>
+    <table>
+        <tr>
+            <th>Elementos</th>
+            <th></th>
+            <th></th>
+            <th></th>
+
+        </tr>
+
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{tarea.titulo}}</td>
+            <td><a href="{% url 'tarea' tarea.id %}">Ver</a></td>
+            <td><a href="{% url 'editar-tarea' tarea.id %}">Editar</a></td>
+            <td><a href="{% url 'eliminar-tarea' tarea.id %}">Eliminar</a></td>
+
+        </tr>
+        {% empty %}
+        <h3>No hay elementos en la lista</h3>
+        {% endfor %}
+    </table>
