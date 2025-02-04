@@ -504,7 +504,7 @@ Educativo y de Aprendizaje Personal
         {% endfor %}
     </table>
 
-38. Creamos la ruta en baseapp/urls.py y agregamos la ruta  path('login/', logueo.as_view(), name="login"),
+41. Creamos la ruta en baseapp/urls.py y agregamos la ruta  path('login/', logueo.as_view(), name="login"),
     ```bash
     from django.urls import path 
     from .views import ListasPendientes, DetalleTarea, CrearTarea, EditarTarea, EliminarTarea, logueo
@@ -518,7 +518,7 @@ Educativo y de Aprendizaje Personal
         path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
 
     ]
-39. en las vistas baseapp/views.py agregamos  from django.contrib.auth.views import LoginView y creamos la Clase logueo
+42. en las vistas baseapp/views.py agregamos  from django.contrib.auth.views import LoginView y creamos la Clase logueo
     ```bash
     from django.views.generic import ListView
     from django.views.generic import DetailView
@@ -561,7 +561,7 @@ Educativo y de Aprendizaje Personal
         context_object_name = 'tarea'
         success_url = reverse_lazy('tareas')
 
-40. Creamos en templates/baseapp/login.html
+43. Creamos en templates/baseapp/login.html
     ```bash
     <h1>ingresar</h1>
     <form method="POST">
@@ -570,7 +570,7 @@ Educativo y de Aprendizaje Personal
         <input type="submit" value="Ingresar">
     </form>
 
-41. Podemos configurar el logout desde la baseapp/urls.py Y Lo configuramos directamente y agregamos path('logout/', LogoutView.as_view(next_page="login"), name="logout" ),
+44. Podemos configurar el logout desde la baseapp/urls.py Y Lo configuramos directamente y agregamos path('logout/', LogoutView.as_view(next_page="login"), name="logout" ),
 
     ```bash
     from django.urls import path 
@@ -586,7 +586,7 @@ Educativo y de Aprendizaje Personal
         path('editar-tarea/<int:pk>', EditarTarea.as_view(), name="editar-tarea"),
         path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
     ]
-42. Modificamos en templates/baseapp/tarea_list.html  el boton de Salir con el objetivo de que no tengamos ataques 
+45. Modificamos en templates/baseapp/tarea_list.html  el boton de Salir con el objetivo de que no tengamos ataques 
     ```bash
     {% if request.user.is_authenticated %}
     <p>{{request.user}}</p>
@@ -622,3 +622,469 @@ Educativo y de Aprendizaje Personal
         <h3>No hay elementos en la lista</h3>
         {% endfor %}
     </table>
+
+46. baseapp/views.py, agregamos from django.contrib.auth.mixins import LoginRequiredMixin, vamos agregando a las paginas que quiero restringir menos la de login con el objetivo de poder ingresar usuario y contraseña
+
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView, DeleteView
+    from django.contrib.auth.views import LoginView
+    from django.contrib.auth.mixins import LoginRequiredMixin
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+    class logueo(LoginView):
+        template_name='baseapp/login.html'
+        field= '__all__'
+        redirect_authenticated_user = True
+        
+        def get_success_url(self):
+            return reverse_lazy('tareas')
+
+    class ListasPendientes(LoginRequiredMixin, ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+    
+    class DetalleTarea(LoginRequiredMixin, DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(LoginRequiredMixin, CreateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+        
+    class EditarTarea(LoginRequiredMixin,UpdateView):
+        model = Tarea
+        fields = '__all__'
+        success_url = reverse_lazy('tareas')
+        
+    class EliminarTarea(LoginRequiredMixin,DeleteView):
+        model = Tarea
+        template_name ='baseapp/tarea_confirm_delete.html'
+        context_object_name = 'tarea'
+        success_url = reverse_lazy('tareas')
+    
+
+47. En proyecto/settings.py agregamos LOGIN_URL = 'login'
+
+    ```bash
+        # Internationalization
+        # https://docs.djangoproject.com/en/5.1/topics/i18n/
+
+        LANGUAGE_CODE = 'en-us'
+
+        TIME_ZONE = 'UTC'
+
+        USE_I18N = True
+
+        USE_TZ = True
+
+        LOGIN_URL = 'login'
+
+48. baseapp/views.py Este código que esta comentado, cada usuario va tener sus propias tareas 
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView, DeleteView
+    from django.contrib.auth.views import LoginView
+    from django.contrib.auth.mixins import LoginRequiredMixin
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+    class logueo(LoginView):
+        template_name='baseapp/login.html'
+        field= '__all__'
+        redirect_authenticated_user = True
+        
+        def get_success_url(self):
+            return reverse_lazy('tareas')
+
+    class ListasPendientes(LoginRequiredMixin, ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+        
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['tareas'] = context['tareas'].filter(usuario=self.request.user) #usuario lo creamos en el modelo
+            context['count'] = context['tareas'].filter(completo=False).count()
+
+            return context
+    
+    class DetalleTarea(LoginRequiredMixin, DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(LoginRequiredMixin, CreateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+        # Para que las nuevas tareas se le asigne al usuario que este logeado
+        def form_valid(self, form):
+            form.instance.usuario = self.request.user
+            return super(CrearTarea, self).form_valid(form)
+        
+    class EditarTarea(LoginRequiredMixin,UpdateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+    class EliminarTarea(LoginRequiredMixin,DeleteView):
+        model = Tarea
+        template_name ='baseapp/tarea_confirm_delete.html'
+        context_object_name = 'tarea'
+        success_url = reverse_lazy('tareas')
+
+49. Ingresamos un link o a en templates/baseapp/login.html
+    ```bash
+    <h1>Ingresar</h1>
+    <form method="POST">
+
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Ingresar">
+    </form>
+    <!-- Agregamos un link de registro -->
+    <p>No tienes una Cuenta? <a href="">Registrate</a></p>
+
+50. Agregamos en templates/baseapp/registro.html
+    ```bash
+    <h1>Registrarse</h1>
+    <form method="POST">
+
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Ingresar">
+    </form>
+    <!-- Agregamos un link de registro -->
+    <p>Ya tienes una Cuenta? <a href="{% url 'login' %}">Ingresa</a></p>
+
+51. Vamos a la vista baseapp/views.py agregamos esta información  y la clase  PaginaRegistro
+    from django.views.generic import CreateView, UpdateView, DeleteView, FormView
+    from django.contrib.auth.forms import UserCreationForm
+    from django.contrib.auth import login
+
+    ```bash
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView, DeleteView, FormView
+    from django.contrib.auth.forms import UserCreationForm
+    from django.contrib.auth import login
+    from django.contrib.auth.views import LoginView
+    from django.contrib.auth.mixins import LoginRequiredMixin
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+    class logueo(LoginView):
+        template_name='baseapp/login.html'
+        field= '__all__'
+        redirect_authenticated_user = True
+        
+        def get_success_url(self):
+            return reverse_lazy('tareas')
+
+    class PaginaRegistro(FormView):
+        template_name = 'baseapp/registro.html'
+        form_class = UserCreationForm
+        redirect_authenticated_user = True
+        success_url = reverse_lazy('tareas')
+
+    class ListasPendientes(LoginRequiredMixin, ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+        
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['tareas'] = context['tareas'].filter(usuario=self.request.user) #usuario lo creamos en el modelo
+            context['count'] = context['tareas'].filter(completo=False).count()
+
+            return context
+    
+    class DetalleTarea(LoginRequiredMixin, DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(LoginRequiredMixin, CreateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+        # Para que las nuevas tareas se le asigne al usuario que este logeado
+        def form_valid(self, form):
+            form.instance.usuario = self.request.user
+            return super(CrearTarea, self).form_valid(form)
+        
+    class EditarTarea(LoginRequiredMixin,UpdateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+    class EliminarTarea(LoginRequiredMixin,DeleteView):
+        model = Tarea
+        template_name ='baseapp/tarea_confirm_delete.html'
+        context_object_name = 'tarea'
+        success_url = reverse_lazy('tareas')
+
+52. Nos situaremos al baseapp/urls.py e ingresamos la ruta de la página de registro en la urls 
+    ```bash
+    from django.urls import path 
+    from .views import ListasPendientes, DetalleTarea, CrearTarea, EditarTarea, EliminarTarea, logueo, PaginaRegistro
+    from django.contrib.auth.views import LogoutView
+
+
+    urlpatterns = [
+        path('',ListasPendientes.as_view(), name="tareas"),
+        path('tarea/<int:pk>', DetalleTarea.as_view(), name="tarea"),
+        path('registro/', PaginaRegistro.as_view(), name='registro'),
+        path('login/', logueo.as_view(), name="login"),
+        path('logout/', LogoutView.as_view(next_page='login'), name="logout"),
+        path('crear-tarea/', CrearTarea.as_view(), name="crear-tarea"),
+        path('editar-tarea/<int:pk>', EditarTarea.as_view(), name="editar-tarea"),
+        path('eliminar-tarea/<int:pk>', EliminarTarea.as_view(), name="eliminar-tarea"),
+
+    ]
+53. Al tener listo el url, vamos al templates/baseapp/login.html y agregamos la url de direccionamiento <p>No tienes una Cuenta? <a href="{% url 'registro' %}">Registrate</a></p>
+
+    ```bash
+    <h1>Ingresar</h1>
+    <form method="POST">
+
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Ingresar">
+    </form>
+    <!-- Agregamos un link de registro-->
+    <p>No tienes una Cuenta? <a href="{% url 'registro' %}">Registrate</a></p>
+
+54. AL ir al link del registrate sale la información en ingles lo podemos cambiar al español, proyecto/settings.py
+    ```bash
+
+    # Internationalization
+    # https://docs.djangoproject.com/en/5.1/topics/i18n/
+
+    LANGUAGE_CODE = 'es-cl' # para Chile
+
+    TIME_ZONE = 'UTC'
+
+    USE_I18N = True
+
+    USE_TZ = True
+
+    LOGIN_URL = 'login'
+
+55. Vamos a la baseapp/views.py vamos agregar la redirección a tareas y llamar a redirect from django.shortcuts import render, redirect
+    ```bash
+    from django.shortcuts import render, redirect
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView, DeleteView, FormView
+    from django.contrib.auth.forms import UserCreationForm
+    from django.contrib.auth import login
+    from django.contrib.auth.views import LoginView
+    from django.contrib.auth.mixins import LoginRequiredMixin
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+    class logueo(LoginView):
+        template_name='baseapp/login.html'
+        field= '__all__'
+        redirect_authenticated_user = True
+        
+        def get_success_url(self):
+            return reverse_lazy('tareas')
+
+    class PaginaRegistro(FormView):
+        template_name = 'baseapp/registro.html'
+        form_class = UserCreationForm
+        redirect_authenticated_user = True
+        success_url = reverse_lazy('tareas')
+        
+        def form_valid(self, form):
+            usuario = form.save()
+            if usuario is not None:
+                login(self.request, usuario)
+            return super(PaginaRegistro,self).form_valid(form)
+
+        
+        # Funcion para redireccionar a tareas
+        def get(self, *args, **kwargs):
+            if self.request.user.is_authenticated:
+                return redirect('tareas')
+            return super(PaginaRegistro, self).get(*args, **kwargs)
+
+    class ListasPendientes(LoginRequiredMixin, ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+        
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['tareas'] = context['tareas'].filter(usuario=self.request.user) #usuario lo creamos en el modelo
+            context['count'] = context['tareas'].filter(completo=False).count()
+
+            return context
+    
+    class DetalleTarea(LoginRequiredMixin, DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(LoginRequiredMixin, CreateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+        # Para que las nuevas tareas se le asigne al usuario que este logeado
+        def form_valid(self, form):
+            form.instance.usuario = self.request.user
+            return super(CrearTarea, self).form_valid(form)
+        
+    class EditarTarea(LoginRequiredMixin,UpdateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+    class EliminarTarea(LoginRequiredMixin,DeleteView):
+        model = Tarea
+        template_name ='baseapp/tarea_confirm_delete.html'
+        context_object_name = 'tarea'
+        success_url = reverse_lazy('tareas')
+
+56. Agregamos en templates/baseapp/tarea_list.html la búsqueda
+    ```bash
+    {% if request.user.is_authenticated %}
+    <p>{{request.user}}</p>
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Salir</button>
+    </form>
+    {% else%}
+    <a href="{% url 'login' %}">Ingresar</a>
+    {% endif %}
+    <hr>
+    <h1>Listas Pendientes</h1>
+    <!-- formulario de búsqueda-->
+    <form method="GET">
+        <input type="text" name="area-buscar">
+        <input type="submit" value="Buscar">
+    </form>
+    <br>
+    <a href="{% url 'crear-tarea' %}">Crear Nueva Tarea</a>
+    <table>
+        <tr>
+            <th>Elementos</th>
+            <th></th>
+            <th></th>
+            <th></th>
+
+        </tr>
+
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{tarea.titulo}}</td>
+            <td><a href="{% url 'tarea' tarea.id %}">Ver</a></td>
+            <td><a href="{% url 'editar-tarea' tarea.id %}">Editar</a></td>
+            <td><a href="{% url 'eliminar-tarea' tarea.id %}">Eliminar</a></td>
+
+        </tr>
+        {% empty %}
+        <h3>No hay elementos en la lista</h3>
+        {% endfor %}
+    </table>
+
+57. En la vista configuramos la búsqueda baseapp/views.py
+    ```bash
+    from django.shortcuts import render, redirect
+    from django.views.generic import ListView
+    from django.views.generic import DetailView
+    from django.views.generic import CreateView, UpdateView, DeleteView, FormView
+    from django.contrib.auth.forms import UserCreationForm
+    from django.contrib.auth import login
+    from django.contrib.auth.views import LoginView
+    from django.contrib.auth.mixins import LoginRequiredMixin
+    from django.urls import reverse_lazy
+    from .models import Tarea
+
+    class logueo(LoginView):
+        template_name='baseapp/login.html'
+        field= '__all__'
+        redirect_authenticated_user = True
+        
+        def get_success_url(self):
+            return reverse_lazy('tareas')
+
+    class PaginaRegistro(FormView):
+        template_name = 'baseapp/registro.html'
+        form_class = UserCreationForm
+        redirect_authenticated_user = True
+        success_url = reverse_lazy('tareas')
+        
+        def form_valid(self, form):
+            usuario = form.save()
+            if usuario is not None:
+                login(self.request, usuario)
+            return super(PaginaRegistro,self).form_valid(form)
+        
+        # Funcion para redireccionar a tareas
+        
+        def get(self, *args, **kwargs):
+            if self.request.user.is_authenticated:
+                return redirect('tareas')
+            return super(PaginaRegistro, self).get(*args, **kwargs)
+
+    class ListasPendientes(LoginRequiredMixin, ListView):
+        model = Tarea
+        template_name ='tarea_list.html'
+        context_object_name = 'tareas'
+        
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['tareas'] = context['tareas'].filter(usuario=self.request.user) #usuario lo creamos en el modelo
+            context['count'] = context['tareas'].filter(completo=False).count()
+            
+            # codigo para hacer la búsqueda
+            valor_buscado = self.request.GET.get('area-buscar') or ''
+            if valor_buscado:
+                context['tareas'] = context['tareas'].filter(titulo__icontains=valor_buscado)
+            context['valor_buscado'] = valor_buscado
+            return context
+    
+    class DetalleTarea(LoginRequiredMixin, DetailView):
+        model = Tarea
+        template_name ='baseapp/tarea.html'
+        context_object_name = 'tarea'
+        
+    class CrearTarea(LoginRequiredMixin, CreateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+        # Para que las nuevas tareas se le asigne al usuario que este logeado
+        def form_valid(self, form):
+            form.instance.usuario = self.request.user
+            return super(CrearTarea, self).form_valid(form)
+        
+    class EditarTarea(LoginRequiredMixin,UpdateView):
+        model = Tarea
+        fields = ['titulo', 'descripcion', 'completo'] # para que no muestre todos los campos "usuario"
+        success_url = reverse_lazy('tareas')
+        
+    class EliminarTarea(LoginRequiredMixin,DeleteView):
+        model = Tarea
+        template_name ='baseapp/tarea_confirm_delete.html'
+        context_object_name = 'tarea'
+        success_url = reverse_lazy('tareas')
+        
+
+
+
+
+
